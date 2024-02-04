@@ -1,0 +1,18 @@
+[package]
+name = "web-ns-solver"
+version = "0.1.0"
+authors = ["Naoki Hori"]
+description = "Navier-Stokes Solver in Browsers"
+repository = "https://github.com/NaokiHori/WebNSSolver"
+edition = "2021"
+publish = false
+license-file = "LICENSE"
+
+[lib]
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[dependencies]
+js-sys = { version = "0.3.67" }
+web-sys = { version = "0.3.67", features = ["CanvasRenderingContext2d", "Document", "HtmlCanvasElement", "Window", "ImageData", ] }
+wasm-bindgen = { version = "0.2.90" }

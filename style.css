@@ -1,0 +1,55 @@
+*,
+*::before,
+*::after {
+  margin: auto;
+  text-align: center;
+  overflow: hidden;
+}
+
+html {
+  width: 100vw;
+  height: 100vh;
+  --header-size: 4vh;
+  --footer-size: 3vh;
+  --cv-size: calc(min(100vw, calc(100vh - 2 * var(--header-size) - var(--footer-size))));
+  background-color: #000000;
+  color: #ffffff;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+}
+
+div.header {
+  width: 100%;
+  height: var(--header-size);
+}
+
+div.header > a {
+  font-size: calc(0.75 * var(--header-size));
+  color: #a9ceec;
+}
+
+#field-descr {
+  width: 100%;
+  height: var(--header-size);
+  font-size: calc(0.75 * var(--header-size));
+}
+
+#my-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+#canvas-container {
+  width: var(--cv-size);
+  height: var(--cv-size);
+}
+
+div.footer {
+  width: 100%;
+  height: var(--footer-size);
+  font-size: calc(0.75 * var(--footer-size));
+}
+
