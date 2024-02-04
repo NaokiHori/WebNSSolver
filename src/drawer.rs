@@ -12,8 +12,12 @@ enum FieldType {
     Ux,
     /// Y velocity
     Uy,
+    /// Velocity magnitude
+    Vel,
     /// Vorticity
     Vo,
+    /// Coherent structure function
+    Co,
 }
 
 /// Stores states.
@@ -131,6 +135,21 @@ impl Drawer {
                 }
                 &(crate::colormap::cividis as fn(f64) -> [u8; 3])
             }
+            FieldType::Vel => {
+                let nx: usize = self.npoints[0] as usize;
+                let ny: usize = self.npoints[1] as usize;
+                let ux: &crate::array::Array = field.get_ux();
+                let uy: &crate::array::Array = field.get_uy();
+                // trim edge cells
+                for j in 0..ny {
+                    for i in 0..nx {
+                        let ux2 = (0. + 0.5 * ux[j + 1][i + 0] + 0.5 * ux[j + 1][i + 1]).powi(2);
+                        let uy2 = (0. - 0.5 * uy[j + 0][i + 1] - 0.5 * uy[j + 1][i + 1]).powi(2);
+                        array[j][i] = (ux2 + uy2).sqrt();
+                    }
+                }
+                &(crate::colormap::turbo as fn(f64) -> [u8; 3])
+            }
             FieldType::Vo => {
                 let nx: usize = self.npoints[0] as usize;
                 let ny: usize = self.npoints[1] as usize;
@@ -164,59 +183,60 @@ impl Drawer {
                     }
                 }
                 &(crate::colormap::inferno as fn(f64) -> [u8; 3])
-            } // FieldType::Co => {
-              //     let nx: usize = self.npoints[0] as usize;
-              //     let ny: usize = self.npoints[1] as usize;
-              //     let ux: &crate::array::Array = field.get_ux();
-              //     let uy: &crate::array::Array = field.get_uy();
-              //     // calculate normalised q-criteria
-              //     for j in 0..ny {
-              //         for i in 0..nx {
-              //             let duxdx = 0. - ux[j + 1][i + 0] + ux[j + 1][i + 1];
-              //             let duydy = 0. + uy[j + 0][i + 1] - uy[j + 1][i + 1];
-              //             let mut duxdymm = 0. - ux[j + 0][i + 0] + ux[j + 1][i + 0];
-              //             let mut duxdypm = 0. - ux[j + 0][i + 1] + ux[j + 1][i + 1];
-              //             let mut duxdymp = 0. - ux[j + 1][i + 0] + ux[j + 2][i + 0];
-              //             let mut duxdypp = 0. - ux[j + 1][i + 1] + ux[j + 2][i + 1];
-              //             let mut duydxmm = 0. + uy[j + 0][i + 0] - uy[j + 0][i + 1];
-              //             let mut duydxpm = 0. + uy[j + 0][i + 1] - uy[j + 0][i + 2];
-              //             let mut duydxmp = 0. + uy[j + 1][i + 0] - uy[j + 1][i + 1];
-              //             let mut duydxpp = 0. + uy[j + 1][i + 1] - uy[j + 1][i + 2];
-              //             duxdymm *= if 0 == j { 2. } else { 1. };
-              //             duxdypm *= if 0 == j { 2. } else { 1. };
-              //             duxdymp *= if ny - 1 == j { 2. } else { 1. };
-              //             duxdypp *= if ny - 1 == j { 2. } else { 1. };
-              //             duydxmm *= if 0 == i { 2. } else { 1. };
-              //             duydxpm *= if nx - 1 == i { 2. } else { 1. };
-              //             duydxmp *= if 0 == i { 2. } else { 1. };
-              //             duydxpp *= if nx - 1 == i { 2. } else { 1. };
-              //             let mut q = 0_f64;
-              //             q += 4. * duxdx * duxdx;
-              //             q += 1. * duxdymm * duydxmm;
-              //             q += 1. * duxdypm * duydxpm;
-              //             q += 1. * duxdymp * duydxmp;
-              //             q += 1. * duxdypp * duydxpp;
-              //             q += 1. * duydxmm * duxdymm;
-              //             q += 1. * duydxpm * duxdypm;
-              //             q += 1. * duydxmp * duxdymp;
-              //             q += 1. * duydxpp * duxdypp;
-              //             q += 4. * duydy * duydy;
-              //             let mut e = 0_f64;
-              //             e += 4. * duxdx * duxdx;
-              //             e += 1. * duxdymm * duxdymm;
-              //             e += 1. * duxdypm * duxdypm;
-              //             e += 1. * duxdymp * duxdymp;
-              //             e += 1. * duxdypp * duxdypp;
-              //             e += 1. * duydxmm * duydxmm;
-              //             e += 1. * duydxpm * duydxpm;
-              //             e += 1. * duydxmp * duydxmp;
-              //             e += 1. * duydxpp * duydxpp;
-              //             e += 4. * duydy * duydy;
-              //             array[j][i] = q / e;
-              //         }
-              //     }
-              //     &(crate::colormap::inferno as fn(f64) -> [u8; 3])
-              // }
+            }
+            FieldType::Co => {
+                let nx: usize = self.npoints[0] as usize;
+                let ny: usize = self.npoints[1] as usize;
+                let ux: &crate::array::Array = field.get_ux();
+                let uy: &crate::array::Array = field.get_uy();
+                // calculate normalised q-criteria
+                for j in 0..ny {
+                    for i in 0..nx {
+                        let duxdx = 0. - ux[j + 1][i + 0] + ux[j + 1][i + 1];
+                        let duydy = 0. + uy[j + 0][i + 1] - uy[j + 1][i + 1];
+                        let mut duxdymm = 0. - ux[j + 0][i + 0] + ux[j + 1][i + 0];
+                        let mut duxdypm = 0. - ux[j + 0][i + 1] + ux[j + 1][i + 1];
+                        let mut duxdymp = 0. - ux[j + 1][i + 0] + ux[j + 2][i + 0];
+                        let mut duxdypp = 0. - ux[j + 1][i + 1] + ux[j + 2][i + 1];
+                        let mut duydxmm = 0. + uy[j + 0][i + 0] - uy[j + 0][i + 1];
+                        let mut duydxpm = 0. + uy[j + 0][i + 1] - uy[j + 0][i + 2];
+                        let mut duydxmp = 0. + uy[j + 1][i + 0] - uy[j + 1][i + 1];
+                        let mut duydxpp = 0. + uy[j + 1][i + 1] - uy[j + 1][i + 2];
+                        duxdymm *= if 0 == j { 2. } else { 1. };
+                        duxdypm *= if 0 == j { 2. } else { 1. };
+                        duxdymp *= if ny - 1 == j { 2. } else { 1. };
+                        duxdypp *= if ny - 1 == j { 2. } else { 1. };
+                        duydxmm *= if 0 == i { 2. } else { 1. };
+                        duydxpm *= if nx - 1 == i { 2. } else { 1. };
+                        duydxmp *= if 0 == i { 2. } else { 1. };
+                        duydxpp *= if nx - 1 == i { 2. } else { 1. };
+                        let mut q = 0_f64;
+                        q += 4. * duxdx * duxdx;
+                        q += 1. * duxdymm * duydxmm;
+                        q += 1. * duxdypm * duydxpm;
+                        q += 1. * duxdymp * duydxmp;
+                        q += 1. * duxdypp * duydxpp;
+                        q += 1. * duydxmm * duxdymm;
+                        q += 1. * duydxpm * duxdypm;
+                        q += 1. * duydxmp * duxdymp;
+                        q += 1. * duydxpp * duxdypp;
+                        q += 4. * duydy * duydy;
+                        let mut e = 0_f64;
+                        e += 4. * duxdx * duxdx;
+                        e += 1. * duxdymm * duxdymm;
+                        e += 1. * duxdypm * duxdypm;
+                        e += 1. * duxdymp * duxdymp;
+                        e += 1. * duxdypp * duxdypp;
+                        e += 1. * duydxmm * duydxmm;
+                        e += 1. * duydxpm * duydxpm;
+                        e += 1. * duydxmp * duydxmp;
+                        e += 1. * duydxpp * duydxpp;
+                        e += 4. * duydy * duydy;
+                        array[j][i] = q / e;
+                    }
+                }
+                &(crate::colormap::magma as fn(f64) -> [u8; 3])
+            }
         };
         let minmax: [f64; 2] = array.get_minmax();
         for n in 0..(w * h) as usize {
@@ -231,11 +251,7 @@ impl Drawer {
                     0_f64
                 } else {
                     // normalise
-                    let val: f64 = (val - min) / (max - min);
-                    // truncate
-                    let val: f64 = if val < 0. { 0. } else { val };
-                    let val: f64 = if 1. < val { 1. } else { val };
-                    val
+                    (val - min) / (max - min)
                 };
                 colormap(val)
             };
@@ -265,10 +281,18 @@ impl Drawer {
                 self.descr.set_text_content(Some("Y velocity"));
             }
             FieldType::Uy => {
+                self.field_type = FieldType::Vel;
+                self.descr.set_text_content(Some("Velocity magnitude"));
+            }
+            FieldType::Vel => {
                 self.field_type = FieldType::Vo;
                 self.descr.set_text_content(Some("Vorticity"));
             }
             FieldType::Vo => {
+                self.field_type = FieldType::Co;
+                self.descr.set_text_content(Some("Q value"));
+            }
+            FieldType::Co => {
                 self.field_type = FieldType::Te;
                 self.descr.set_text_content(Some("Temperature"));
             }
