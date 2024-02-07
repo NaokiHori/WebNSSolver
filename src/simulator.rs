@@ -181,7 +181,7 @@ impl Field {
 /// Time step size for the next iteration.
 fn find_dt(dt_max: f64, field: &Field) -> f64 {
     // safety factors for the advective / diffusive components
-    const FACTORS: [f64; 2] = [0.15, 0.25];
+    const FACTORS: [f64; 2] = [0.15, 0.125];
     // minimum grid size, just in case
     let delta: f64 = DELTAS[0].min(DELTAS[1]);
     // diffusivities
