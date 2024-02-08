@@ -24,6 +24,10 @@ const DELTAS: [f64; 2] = [
     LENGTHS[1] / NPOINTS[1] as f64,
 ];
 
+/// Number of tracer particle history.
+pub const NHISTORY: usize = 128;
+const NTRACERS: [usize; 2] = [NPOINTS[0] / 16, NPOINTS[1] / 16];
+
 /// Numerical viscosities, momentum / temperature.
 ///
 /// Positive numbers are given to stabilise the integration by dumping out the non-linear oscillation.
@@ -58,6 +62,8 @@ pub struct Field {
     visu: f64,
     /// Normalised temperature diffusivity
     vist: f64,
+    /// Tracer positions
+    pub tracers: Vec<[[f64; 2]; NHISTORY]>,
 }
 
 impl Field {
@@ -127,6 +133,18 @@ impl Field {
         // diffusivities
         let visu: f64 = (pr / ra).sqrt();
         let vist: f64 = (1. / pr / ra).sqrt();
+        // tracers
+        let mut tracers = Vec::<[[f64; 2]; NHISTORY]>::new();
+        for j in 0..NTRACERS[1] {
+            let dy: f64 = LENGTHS[1] / NTRACERS[1] as f64;
+            let y: f64 = 0.5 * (2 * j + 1) as f64 * dy;
+            for i in 0..NTRACERS[0] {
+                let dx: f64 = LENGTHS[0] / NTRACERS[0] as f64;
+                let x: f64 = 0.5 * (2 * i + 1) as f64 * dx;
+                let tracer: [[f64; 2]; NHISTORY] = [[x, y]; NHISTORY];
+                tracers.push(tracer);
+            }
+        }
         Field {
             ux,
             uy,
@@ -141,6 +159,7 @@ impl Field {
             waves,
             visu,
             vist,
+            tracers,
         }
     }
 
@@ -415,11 +434,45 @@ fn correct(dt: f64, field: &mut Field) -> () {
     }
 }
 
+/// Updating tracer particles.
+fn update_tracers(dt: f64, field: &mut Field) -> () {
+    let ux: &Array = &field.ux;
+    let uy: &Array = &field.uy;
+    let tracers: &mut Vec<[[f64; 2]; NHISTORY]> = &mut field.tracers;
+    for tracer in tracers.iter_mut() {
+        // take latest information
+        let x: f64 = tracer[NHISTORY - 1][0];
+        let y: f64 = tracer[NHISTORY - 1][1];
+        let i: usize = (x / DELTAS[0]) as usize;
+        let j: usize = (y / DELTAS[1]) as usize;
+        let ux: f64 = 0.5 * ux[j + 1][i + 0] + 0.5 * ux[j + 1][i + 1];
+        let uy: f64 = 0.5 * uy[j + 0][i + 1] + 0.5 * uy[j + 1][i + 1];
+        let mut x: f64 = x + ux * dt;
+        let mut y: f64 = y + uy * dt;
+        if x < 0.5 * DELTAS[0] {
+            x = DELTAS[0];
+        }
+        if LENGTHS[0] - DELTAS[0] < x {
+            x = LENGTHS[0] - DELTAS[0];
+        }
+        if y < 0.5 * DELTAS[1] {
+            y = DELTAS[1];
+        }
+        if LENGTHS[1] - DELTAS[1] < y {
+            y = LENGTHS[1] - DELTAS[1];
+        }
+        // discard the head, add the latest position to the tail
+        tracer.rotate_left(1);
+        tracer[NHISTORY - 1] = [x, y];
+    }
+}
+
 /// Entry point.
 pub fn evolve(dt_max: f64, field: &mut Field) -> f64 {
     let dt: f64 = find_dt(dt_max, field);
     predict(dt, field);
     correct(dt, field);
+    update_tracers(dt, field);
     return dt;
 }
 

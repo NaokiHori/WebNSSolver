@@ -25,6 +25,23 @@ Overview
 
 * `Main page <https://naokihori.github.io/WebNSSolver/index.html>`_
 
+   Click the canvas to change the scalar field to be drawn.
+   For now 7 options are available:
+
+   * Temperature
+
+   * X velocity
+
+   * Y velocity
+
+   * Velocity magnitude
+
+   * Vorticity
+
+   * Q-value
+
+   * Tracer particles
+
    By default the Rayleigh and the Prantdl numbers are set to ``8.5e7`` and ``4.4e0``, respectively.
    Two URL parameters ``ra`` and ``pr`` are available to change them, e.g.: ``https://naokihori.github.io/WebNSSolver/index.html?ra=1.0e8&pr=0.25``.
 
