@@ -19,31 +19,44 @@ Navier-Stokes solver in Browsers.
    :target: https://naokihori.github.io/WebNSSolver/index.html
    :width: 800
 
-********
-Overview
-********
+*****************************************************************
+`Main page <https://naokihori.github.io/WebNSSolver/index.html>`_
+*****************************************************************
 
-* `Main page <https://naokihori.github.io/WebNSSolver/index.html>`_
+=============
+Visualisation
+=============
 
-   Click the canvas to change the scalar field to be drawn.
-   For now 7 options are available:
+Click the canvas to change the scalar field to be drawn.
+For now 7 options are available:
 
-   * Temperature
+* Temperature
 
-   * X velocity
+* X velocity
 
-   * Y velocity
+* Y velocity
 
-   * Velocity magnitude
+* Velocity magnitude
 
-   * Vorticity
+* Vorticity
 
-   * Q-value
+* Q-value
 
-   * Tracer particles
+* Tracer particles
 
-   By default the Rayleigh and the Prantdl numbers are set to ``8.5e7`` and ``4.4e0``, respectively.
-   Two URL parameters ``ra`` and ``pr`` are available to change them, e.g.: ``https://naokihori.github.io/WebNSSolver/index.html?ra=1.0e8&pr=0.25``.
+==========
+Parameters
+==========
 
-* `Documentation <https://naokihori.github.io/WebNSSolver/doc/web_ns_solver/index.html>`_
+By default the Rayleigh and the Prantdl numbers are set to ``8.5e7`` and ``4.4e0``, respectively.
+Two URL parameters ``ra`` and ``pr`` are available to change them, e.g.: ``https://naokihori.github.io/WebNSSolver/index.html?ra=1.0e8&pr=0.25``.
+
+The minimum / maximum Rayleigh numbers are ``1.0e+4`` / ``4.0e+8``.
+The minimum / maximum Prantdl numbers are ``1.0e-1`` / ``1.0e+1``.
+
+*************
+Documentation
+*************
+
+Implementation details are documented `here <https://naokihori.github.io/WebNSSolver/doc/web_ns_solver/index.html>`_.
 

@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - Cargo.toml
+      - index.html
+      - src/**
+      - style.css
+      - tsconfig.json
+      - typescript/**
   workflow_dispatch:
 
 jobs:
