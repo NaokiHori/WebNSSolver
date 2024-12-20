@@ -32,20 +32,20 @@ impl Plan {
         let c: Vec<f64> = vec![0.; nitems];
         let u: Vec<f64> = vec![0.; nitems];
         let v: Vec<f64> = vec![0.; nitems];
-        return Plan {
+        Plan {
             nitems,
             stride,
             l,
             c,
             u,
             v,
-        };
+        }
     }
 
     /// Solves tri-diagonal linear systems by means of the Thomas algorithm.
     ///
     /// Note that the rank of the linear system can be `nitems-1`.
-    pub fn solve(&mut self, q: &mut [f64]) -> () {
+    pub fn solve(&mut self, q: &mut [f64]) {
         // Thomas algorithm for a strided input / output (q)
         let nitems: usize = self.nitems;
         let stride: usize = self.stride;
@@ -55,7 +55,7 @@ impl Plan {
         let v: &mut Vec<f64> = &mut self.v;
         // forward
         v[0] = u[0] / c[0];
-        q[0] = q[0] / c[0];
+        q[0] /= c[0];
         for i in 1..nitems - 1 {
             let val: f64 = 1. / (c[i] - l[i] * v[i - 1]);
             v[i] = val * u[i];
@@ -81,7 +81,7 @@ impl Plan {
 mod test {
     const EPS: f64 = 1e-8;
     #[test]
-    fn case1() -> () {
+    fn case1() {
         let nitems: usize = 3;
         let stride: usize = 1;
         let mut plan = super::Plan::new(nitems, stride);
@@ -101,7 +101,7 @@ mod test {
         }
     }
     #[test]
-    fn case2() -> () {
+    fn case2() {
         let nitems: usize = 3;
         let stride: usize = 2;
         let mut plan = super::Plan::new(nitems, stride);

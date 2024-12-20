@@ -1,5 +1,5 @@
 [package]
-name = "web-ns-solver"
+name = "web_ns_solver"
 version = "0.1.0"
 authors = ["Naoki Hori"]
 description = "Navier-Stokes Solver in Browsers"
@@ -8,11 +8,23 @@ edition = "2021"
 publish = false
 license-file = "LICENSE"
 
+[[bin]]
+name = "web_ns_solver"
+path = "src/main.rs"
+
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 path = "src/lib.rs"
 
+[features]
+default = []
+binary_crate = ["rust_npy_io"]
+
 [dependencies]
-js-sys = { version = "0.3.67" }
-web-sys = { version = "0.3.67", features = ["CanvasRenderingContext2d", "Document", "HtmlCanvasElement", "Window", "ImageData", ] }
-wasm-bindgen = { version = "0.2.90" }
+wasm-bindgen = { version = "0.2.99" }
+
+[dependencies.rust_npy_io]
+git = "https://github.com/NaokiHori/rust_npy_io.git"
+branch = "main"
+features = ["writer"]
+optional = true

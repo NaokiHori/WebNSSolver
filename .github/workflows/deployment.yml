@@ -1,22 +1,11 @@
-name: Deployment
+name: Deploy-Pages
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - Cargo.toml
-      - index.html
-      - src/**
-      - style.css
-      - tsconfig.json
-      - typescript/**
   workflow_dispatch:
 
 jobs:
-
   deploy:
-    name: Deploy page
+    name: Build package and deploy it to GH Pages
     permissions:
       contents: read
       pages: write
@@ -28,49 +17,44 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    env:
+      ASSETS: assets
     steps:
       - name: Checkout repository
         uses: actions/checkout@main
+      - name: Make directory to store all artifacts
+        run: |
+          mkdir ${{ env.ASSETS }}
+          cp thumbnail.jpg ${{ env.ASSETS }}
       - name: Setup node
         uses: actions/setup-node@main
-      - name: Install TypeScript
+      - name: Install framework
         run: |
-          npm install -g typescript
+          npm install
       - name: Install wasm-pack
         run: |
           cargo install wasm-pack
-      - name: Perform unit tests
+      - name: Unit testing
         run: |
-          cargo test
-      - name: Build crate documentation
-        run: |
-          cargo doc --document-private-items --no-deps --package=web-ns-solver
-          rm -f target/doc/.lock
-      - name: Build and execute binary crate
-        run: |
-          cargo run --release
+          cargo test --features="binary_crate"
       - name: Build library crate
         run: |
-          dest="built"
           wasm-pack build --target web
-          mkdir ${dest}
-          cp pkg/*.js ${dest}/
-          cp pkg/*.wasm ${dest}/
-          cp pkg/*.ts typescript/
-          tsc --outDir ${dest}
-      - name: Prepare directory to be deployed
+      - name: Build web application
         run: |
-          mkdir package
-          cp -r \
-            style.css thumbnail.jpg index.html built target/doc \
-            package/
+          npx \
+            vite build \
+            --outDir=${{ env.ASSETS }} \
+            --base=https://naokihori.github.io/WebNSSolver/
+      - name: Attach thumbnail to the root
+        run: |
+          cp thumbnail.jpg ${{ env.ASSETS }}/
       - name: Setup GitHub Pages
         uses: actions/configure-pages@main
       - name: Upload HTML
         uses: actions/upload-pages-artifact@main
         with:
-          path: package
+          path: ${{ env.ASSETS }}
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@main
-

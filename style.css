@@ -1,55 +1,56 @@
-*,
-*::before,
-*::after {
-  margin: auto;
-  text-align: center;
+html {
+  margin: 0;
+  padding: 0;
+  height: 100dvh;
   overflow: hidden;
 }
 
-html {
-  width: 100vw;
-  height: 100vh;
-  --header-size: 4vh;
-  --footer-size: 3vh;
-  --cv-size: calc(min(100vw, calc(100vh - 2 * var(--header-size) - var(--footer-size))));
-  background-color: #000000;
-  color: #ffffff;
-}
-
 body {
-  width: 100%;
+  margin: 0;
+  padding: 0;
   height: 100%;
+  background-color: #222222;
+  display: flex;
+  flex-flow: column;
+  overflow: hidden;
 }
 
-div.header {
-  width: 100%;
-  height: var(--header-size);
+body > div.select-container {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
 }
 
-div.header > a {
-  font-size: calc(0.75 * var(--header-size));
-  color: #a9ceec;
+select {
+  font-size: x-large;
 }
 
-#field-descr {
-  width: 100%;
-  height: var(--header-size);
-  font-size: calc(0.75 * var(--header-size));
+body > canvas {
+  min-height: 0;
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0;
+  overflow: hidden;
 }
 
-#my-canvas {
-  width: 100%;
-  height: 100%;
+body > footer {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  & > a {
+    font-size: large;
+    color: #ffffff;
+  }
 }
-
-#canvas-container {
-  width: var(--cv-size);
-  height: var(--cv-size);
-}
-
-div.footer {
-  width: 100%;
-  height: var(--footer-size);
-  font-size: calc(0.75 * var(--footer-size));
-}
-
